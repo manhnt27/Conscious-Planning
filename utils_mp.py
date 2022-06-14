@@ -425,3 +425,4 @@ def run_multiprocess(args, func_env_train, func_env_eval):
     tasks.append(Process(target=evaluator, args=[steps_interact, event_terminate, queues[-1], queue_envs_eval, args, func_env_eval, writer]))
     for task in tasks: task.start()
     for task in tasks: task.join()
+    print("End")
