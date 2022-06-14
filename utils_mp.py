@@ -57,6 +57,7 @@ def get_env_minigrid_train(args, lava_density_range=[0.3, 0.4], min_num_route=1,
     if args.framestack: env = FrameStack(env, args.framestack)
     return env
 
+from gym.wrappers import Monitor
 def get_env_minigrid_test(args, lava_density_range=[0.3, 0.4], min_num_route=1, transposed=True):
     config = {'width': args.size_world, 'height': args.size_world, 'lava_density_range': lava_density_range, 'min_num_route': min_num_route, 'transposed': transposed, 'random_color': args.color_distraction}
     if 'key' in args.game.lower():
@@ -64,6 +65,7 @@ def get_env_minigrid_test(args, lava_density_range=[0.3, 0.4], min_num_route=1, 
     else:
         env = gym.make('RandDistShift-%s' % args.version_game, **config)
     if args.framestack: env = FrameStack(env, args.framestack)
+    env = Monitor(env, './video', force=True)
     return env
 
 def get_env_atari(args): 
@@ -409,6 +411,28 @@ def evaluator(steps_interact, event_terminate, queue, queue_envs_eval, args, fun
                 agent.steps_interact, agent.step_last_record_ts = steps_interact, steps_interact
                 evaluate_agent_mp(lambda : func_env(args), agent, num_episodes=20, suffix='_modelfree', disable_planning=True, type_env=type_env, step_record=None, queue_envs=queue_envs_eval)
 
+import glob
+import io
+import base64
+import numpy as np
+
+from IPython.display import HTML
+from IPython import display as ipythondisplay
+
+def show_video():
+    mp4list = glob.glob('video/*.mp4')
+    if len(mp4list) > 0:
+        mp4 = mp4list[0]
+        video = io.open(mp4, 'r+b').read()
+        encoded = base64.b64encode(video)
+        ipythondisplay.display(HTML(data='''<video alt="test" autoplay 
+                loop controls style="height: 400px;">
+                <source src="data:video/mp4;base64,{0}" type="video/mp4" />
+             </video>'''.format(encoded.decode('ascii'))))
+    else:
+        print("Could not find video")
+
+
 def run_multiprocess(args, func_env_train, func_env_eval):
     pid_main = os.getpid()
     env = func_env_train(args)
@@ -426,3 +450,4 @@ def run_multiprocess(args, func_env_train, func_env_eval):
     for task in tasks: task.start()
     for task in tasks: task.join()
     print("End")
+    show_video()
