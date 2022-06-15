@@ -396,6 +396,7 @@ def evaluator(steps_interact, event_terminate, queue, queue_envs_eval, args, fun
                 del dict_shared
                 dict_shared = queue.get_nowait()
             agent.weights_copyfrom(dict_shared)
+            print("For test")
             global agent_test
             agent_test = agent
             steps_interact = dict_shared['steps_processed']
