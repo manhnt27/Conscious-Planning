@@ -358,9 +358,8 @@ def learner(global_rb, queues, steps_interact, episodes_interact, event_terminat
             episode_last_eval += args.freq_eval
         if agent.steps_processed >= min(args.steps_stop, args.steps_max) or episodes_interact_curr >= args.episodes_max:
             event_terminate.set()
-agent_test = None
-def set_agent(agent):
-    agent_test = agent
+
+
 
 def evaluator(steps_interact, event_terminate, queue, queue_envs_eval, args, func_env, writer):
     if args.gpu_evaluator:
@@ -397,7 +396,8 @@ def evaluator(steps_interact, event_terminate, queue, queue_envs_eval, args, fun
                 del dict_shared
                 dict_shared = queue.get_nowait()
             agent.weights_copyfrom(dict_shared)
-            set_agent(agent)
+            global agent_test
+            agent_test = agent
             steps_interact = dict_shared['steps_processed']
             del dict_shared
             agent.steps_interact, agent.step_last_record_ts = steps_interact, steps_interact # for the lambda and the logging
